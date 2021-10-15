@@ -3,64 +3,90 @@
     ViewBag.Title = "List of all stores";
 
     var store = from s in Model where s.Id == ViewBag.storeId select s;
+    var id = from items in store select items.Id;
+    var city = from items in store select items.City;
     var carList = from c in store select c.CarList;
 }
 
 <h2 class="text-center">@ViewBag.Title</h2>
 
-    <div class="container fluid p-0 m-0">
-        <div class="row">
-            <div class="col-3">
-                <div class="row">
-                    <form asp-action="StoreList" method="post">
-                        <div class="form-group">
+<div class="container fluid p-0 m-0">
+    <div class="row">
+        <div class="col-3">
+            <div class="row">
+                <form asp-action="StoreList">
+                    <div class="row">
+                        <div class="col-6">
                             <select asp-items="@(new SelectList(Model, "Id", "City"))" class="selectpicker form-control" id="citySelect" name="storeId">
                             </select>
-                        </div><br />
-                        <div class="form-group">
+                        </div>
+                        <div class="col-6">
                             <button type="submit" class="btn btn-success form-control" id="showButton">Show Table</button>
                         </div>
-                    </form>
-                    
+                    </div>
+                </form>
+                <div>
+                    @foreach (var item in store)
+                    {
+                        <h2>@item.City</h2>
+                        <h5>@item.Description</h5>
+                        <h5>Total cars: @item.CarList.Count</h5>
+                        <form asp-action="DeleteStore" method="post">
+                            <div class="control-group">
+                                <a class="btn btn-info" asp-action="AddStore" asp-route-storeId="@item.Id">Update</a>
+                                <a class="btn btn-success" asp-action="AddStore" asp-route-storeId="@item.Id" asp-route-readOnly="readonly">Add Car</a>
+                                <button class="btn btn-danger" asp-action="DeleteStore" asp-route-storeId="@item.Id">Delete</button>
+                            </div>
+                        </form>
+                    }
                 </div>
-            </div>
-            <div class="col-9">
-                <table class="table table-striped table-bordered m-0 p-0">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Date of release</th>
-                            <th>Price</th>
-                            <th>Remark</th>
-                            <th>Is in store</th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var car in carList)
-                        {
-                            @foreach (var item in car)
-                            {
-                                <tr>
-                                    <td>@item.Name</td>
-                                    <td>@item.DateRelease</td>
-                                    <td>@item.Price</td>
-                                    <td>@item.Remark</td>
-                                    <td>@item.IsInStore</td>
-                                    <td><a asp-action="UpdateStore" asp-route-carId="@item.Id" asp-route-storeId="@ViewBag.storeId" class="btn btn-sm btn-outline-dark">Update</a></td>
-                                    <td>
-                                        <form asp-action="DeleteCar" asp-controller="HttpClientCar" method="post">
-                                            <input type="hidden" value="@item.Id" name="carId" />
-                                            <input type="hidden" value="@ViewBag.storeId" name="storeId" />
-                                            <input type="submit" class="btn btn-sm btn-outline-danger" value="Delete" />
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
+
             </div>
         </div>
+        <div class="col-9">
+            <table class="table table-striped table-bordered m-0 p-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date of release</th>
+                        <th>Price</th>
+                        <th>Remark</th>
+                        <th>Is in store</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var car in carList)
+                    {
+                        @foreach (var item in car)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@item.DateRelease</td>
+                                <td>@item.Price</td>
+                                <td>@item.Remark</td>
+                                <td>@item.IsInStore</td>
+                                <td>
+                                    <a asp-action="UpdateCar" 
+                                       asp-controller="HttpClientCar" 
+                                       asp-route-carId="@item.Id" 
+                                       asp-route-storeId="@ViewBag.storeId" class="btn btn-sm btn-outline-dark">
+                                        Update
+                                    </a>
+                                </td>
+                                <td>
+                                    <form asp-action="DeleteCar" asp-controller="HttpClientCar" method="post">
+                                        <input type="hidden" value="@item.Id" name="carId" />
+                                        <input type="hidden" value="@ViewBag.storeId" name="storeId" />
+                                        <input type="submit" class="btn btn-sm btn-outline-danger" value="Delete" />
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
+</div>

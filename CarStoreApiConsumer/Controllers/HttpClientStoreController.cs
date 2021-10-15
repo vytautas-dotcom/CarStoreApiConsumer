@@ -30,17 +30,33 @@ namespace CarStoreApiConsumer.Controllers
         }
 
 
-        public IActionResult AddStore()
+        public async Task<IActionResult> AddStore(string readOnly = null, Guid storeId = default)
         {
-
+            Store receivedStore = new Store();
+            if (storeId != Guid.Empty)
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    using (var response = await httpClient.GetAsync("https://localhost:44372/stores/"+ storeId))
+                    {
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                        receivedStore = JsonConvert.DeserializeObject<Store>(apiResponse);
+                        ViewBag.StatusCode = (int)response.StatusCode;
+                    }
+                }
+                ViewBag.Id = storeId;
+                ViewBag.ReadOnly = readOnly;
+                return View(receivedStore);
+                
+            }
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddStore(Store store, Guid storeID)
+        public async Task<IActionResult> AddStore(Store store = null, Guid storeId = default)
         {
             Store receivedStore = new Store();
-            if (store.Id == Guid.Empty && storeID == Guid.Empty)
+            if (store.Id == Guid.Empty && storeId == Guid.Empty)
             {
                 using (var httpClient = new HttpClient())
                 {
@@ -57,7 +73,7 @@ namespace CarStoreApiConsumer.Controllers
             }
             else
             {
-                store.Id = storeID;
+                store.Id = storeId;
                 using (var httpClient = new HttpClient())
                 {
                     StringContent stringContent = new StringContent(JsonConvert.SerializeObject(store),
@@ -70,8 +86,29 @@ namespace CarStoreApiConsumer.Controllers
                         }
                 }
             }
-            ViewBag.Id = receivedStore.Id != Guid.Empty ? receivedStore.Id : storeID;
-            return View(receivedStore);
+            ViewBag.Id = receivedStore.Id != Guid.Empty ? receivedStore.Id : storeId;
+            return RedirectToAction("StoreList", new { storeId = storeId});
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteStore(Guid storeId)
+        {
+            bool isSuccess;
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.DeleteAsync("https://localhost:44372/stores/" + storeId))
+                {
+                    isSuccess = response.IsSuccessStatusCode;
+                }
+            }
+            if (isSuccess)
+            {
+                return RedirectToAction("StoreList");
+            }
+            else
+            {
+                return BadRequest("Something went wrong!");
+            }
         }
 
     }

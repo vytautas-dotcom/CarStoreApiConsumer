@@ -2,21 +2,22 @@
 @{
     ViewBag.Title = "Add new car store";
     int i = 0;
+    var read = ViewBag.ReadOnly != null ? ViewBag.ReadOnly : null;
 }
 
 <h2 class="text-center">@ViewBag.Title</h2>
 <div>
     <form method="post">
         <div class="form-group">
-            <input type="hidden"  asp-for="Id" class="form-control" value="@ViewBag.Id" name="storeID"/>
+            <input type="hidden"  asp-for="Id" class="form-control" value="@ViewBag.Id" name="storeId"/>
         </div>
         <div class="form-group">
             <label asp-for="City"></label>
-            <input asp-for="City" class="form-control" />
+            <input asp-for="City" class="form-control" readonly="@read"/>
         </div>
         <div class="form-group">
             <label asp-for="Description"></label>
-            <input asp-for="Description" class="form-control" />
+            <input asp-for="Description" class="form-control" readonly="@read"/>
         </div>
         <div class="form-group">
             <div id="newCar" style="display:none;">
